@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Music UI",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": ["tabs"],
+  "web_accessible_resources": [
+    {
+      "resources": ["player.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
