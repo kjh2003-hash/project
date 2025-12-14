@@ -1,4 +1,6 @@
-const API_KEY = "AIzaSyClWwfEWi9axiBzk9xCGCz6KwKOp4UroQM";
+import config from "./apikey.js";
+
+const API_KEY = config.NEWS_API_KEY;
 
 const playBtn = document.getElementById("play-btn");
 const playIcon = document.getElementById("play-icon");
