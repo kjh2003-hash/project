@@ -112,7 +112,7 @@ body {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .bottom-actions {
@@ -210,3 +210,47 @@ body {
   margin-bottom: 10px;
 }
 
+.play-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.play-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+  fill: none;
+  stroke-width: 2;
+}
+
+#playlist-view {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#playlist-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+#playlist-view h3 {
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+
+.playlist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.icon-btn.danger svg {
+  stroke: #ff4d4d;
+}
+
+.icon-btn.danger:hover {
+  opacity: 1;
+}

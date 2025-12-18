@@ -58,40 +58,6 @@ function formatTime(sec) {
 let player;
 let progressTimer = null;
 
-function onYouTubeIframeAPIReady() {
-  player = new YT.Player("yt-player", {
-    height: "1",
-    width: "1",
-    videoId: "",
-    playerVars: {
-      controls: 0,
-      rel: 0,
-    },
-    events: {
-      onReady: () => {
-        console.log("YT Player Ready");
-      },
-      onStateChange: onPlayerStateChange,
-    },
-  });
-}
-
-function onPlayerStateChange(e) {
-  if (e.data === YT.PlayerState.PLAYING) {
-    playIcon.innerHTML = `
-      <circle cx="12" cy="12" r="10"></circle>
-      <line x1="10" y1="8" x2="10" y2="16"></line>
-      <line x1="14" y1="8" x2="14" y2="16"></line>
-    `;
-    startProgress();
-  } else {
-    playIcon.innerHTML = `
-      <circle cx="12" cy="12" r="10"></circle>
-      <polygon points="10 8 16 12 10 16 10 8"></polygon>
-    `;
-    stopProgress();
-  }
-}
 
 playBtn.onclick = () => {
   if (!player) return;
@@ -103,50 +69,74 @@ playBtn.onclick = () => {
   }
 };
 
-function startProgress() {
-  if (progressTimer) return;
-  progressTimer = setInterval(() => {
-    if (!player) return;
-
-    const current = player.getCurrentTime();
-    const total = player.getDuration();
-    if (!total) return;
-
-    currentTimeEl.textContent = formatTime(current);
-    totalTimeEl.textContent = formatTime(total);
-    progressFill.style.width = `${(current / total) * 100}%`;
-  }, 500);
-}
-
-function stopProgress() {
-  clearInterval(progressTimer);
-  progressTimer = null;
-}
-
-const playlist = [];
+let playlist = [];
 let currentIndex = 0;
 
-function addToPlaylist(videoId, title) {
-  playlist.push({ videoId, title });
+chrome.runtime.sendMessage(
+  { type: "GET_PLAYLIST" },
+  (res) => {
+    if (res && Array.isArray(res.playlist)) {
+      playlist = res.playlist;
+      renderPlaylist();
+    }
+  }
+);
+
+function addToPlaylist(videoId, title, thumbnail) {
+  playlist.push({ videoId, title, thumbnail });
   renderPlaylist();
+
+  chrome.runtime.sendMessage({
+    type: "SYNC_PLAYLIST",
+    playlist
+  });
 }
 
 function renderPlaylist() {
   playlistListEl.innerHTML = "";
+
   playlist.forEach((item, index) => {
     const div = document.createElement("div");
-    div.className = "playlist-item";
-    div.textContent = item.title;
-    div.onclick = () => playFromPlaylist(index);
+    div.className = "result-item";
+
+    div.innerHTML = `
+      <img src="${item.thumbnail}" />
+      <div class="title">${item.title}</div>
+      <button class="play-btn">
+        <svg viewBox="0 0 24 24">
+          <polygon points="10 8 16 12 10 16 10 8"></polygon>
+        </svg>
+      </button>
+    `;
+
+    const playBtn = div.querySelector(".play-btn");
+
+    playBtn.onclick = (e) => {
+      e.stopPropagation();
+      playFromPlaylist(index);
+    };
+
     playlistListEl.appendChild(div);
   });
 }
 
 function playFromPlaylist(index) {
-  if (!playlist[index] || !player) return;
+  if (!playlist[index]) return;
+
   currentIndex = index;
+  const videoId = playlist[index].videoId;
+
   titleEl.textContent = playlist[index].title;
-  player.loadVideoById(playlist[index].videoId);
+
+  chrome.runtime.sendMessage({
+    type: "PLAY_VIDEO",
+    videoId
+  });
+
+  if (player) {
+    player.loadVideoById(videoId);
+  }
+
   showPlayer();
 }
 
@@ -225,7 +215,7 @@ function renderSearchResults(items) {
       
       if (addBtn.dataset.saved === "true") return;
 
-      addToPlaylist(videoId, title);
+      addToPlaylist(videoId, title, thumbnail);
 
       addBtn.innerHTML = `
         <svg viewBox="0 0 24 24">
@@ -247,3 +237,18 @@ searchInput.addEventListener("keydown", (e) => {
   }
 });
 
+document.getElementById("playlist-back-btn").onclick = showPlayer;
+
+const clearPlaylistBtn = document.getElementById("clear-playlist-btn");
+
+clearPlaylistBtn.onclick = () => {
+  playlist.length = 0;
+  currentIndex = 0;
+
+  renderPlaylist();
+
+  chrome.runtime.sendMessage({
+    type: "CLEAR_PLAYLIST",
+    playlist: []
+  });
+};

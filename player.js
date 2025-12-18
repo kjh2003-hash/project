@@ -1,24 +1,45 @@
-let player;
-let currentVideoId = null;
+console.log("PLAYER SCRIPT LOADED");
 
-window.addEventListener("message", (e) => {
-  if (e.data.type === "PLAY") {
-    loadVideo(e.data.videoId);
-  }
+let iframe = null;
+const ORIGIN = location.origin;
+
+window.addEventListener("DOMContentLoaded", () => {
+  iframe = document.getElementById("yt-player");
+  console.log("PLAYER IFRAME REMOTE:", iframe);
 });
 
-function onYouTubeIframeAPIReady() {
-  player = new YT.Player("yt-player", {
-    height: "0",
-    width: "0",
-    playerVars: {
-      controls: 0,
-      rel: 0
-    }
-  });
-}
+chrome.runtime.onMessage.addListener((msg) => {
+  console.log("PLAYER GOT:", msg);
 
-function loadVideo(videoId) {
-  currentVideoId = videoId;
-  player.loadVideoById(videoId);
-}
+  if (msg.type === "PLAY_VIDEO") {
+    if (!iframe) return;
+
+    const videoId = msg.videoId;
+
+    iframe.src =
+      `https://www.youtube.com/embed/${videoId}` +
+      `?enablejsapi=1&mute=1&origin=${encodeURIComponent(ORIGIN)}`;
+
+    setTimeout(() => {
+      iframe.contentWindow?.postMessage(
+        JSON.stringify({
+          event: "command",
+          func: "playVideo",
+          args: []
+        }),
+        ORIGIN
+      );
+
+      setTimeout(() => {
+        iframe.contentWindow?.postMessage(
+          JSON.stringify({
+            event: "command",
+            func: "unMute",
+            args: []
+          }),
+          ORIGIN
+        );
+      }, 300);
+    }, 300);
+  }
+});
