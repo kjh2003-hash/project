@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="options.css">
+  <title>AnyWhere Music - Options</title>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo"><span>AnyWhere Music</span></div>
+      <nav class="side-nav">
+        <button class="nav-item active" data-section="general">일반 설정</button>
+        <button class="nav-item" data-section="history">감상 기록</button>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <section id="section-general" class="content-section active">
+        <h2>일반 설정</h2>
+        <div class="setting-card">
+          <div class="setting-info">
+            <h3>데이터 동기화</h3>
+            <p>브라우저 계정에 재생목록을 저장합니다.</p>
+          </div>
+          <button class="btn-primary" id="btn-sync">지금 동기화</button>
+        </div>
+      </section>
+      
+      <section id="section-history" class="content-section">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+          <h2>전체 히스토리</h2>
+          <button class="btn-danger" id="btn-clear-history">전체 삭제</button>
+        </div>
+        <table id="history-table">
+          <thead><tr><th>날짜</th><th>곡 정보</th><th>관리</th></tr></thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <div id="confirm-modal" class="modal-overlay">
+    <div class="modal-content">
+      <p id="modal-message">정말 삭제하시겠습니까?</p>
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn-secondary">취소</button>
+        <button id="modal-confirm" class="btn-danger-fill">삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>

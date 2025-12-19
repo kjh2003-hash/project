@@ -1,0 +1,655 @@
+/* ========================================================================== */
+/* [1] 전역 변수 설정 */
+/* 앱 전체에서 사용하는 색상 팔레트와 공통 값을 정의합니다. */
+/* ========================================================================== */
+:root {
+  /* 메인 배경색: 짙은 차콜/검정 */
+  --bg-main: #0c0c0e;
+
+  /* 포인트 색상 (네온 핑크): 재생 버튼, 강조 텍스트 등 */
+  --accent-neon: #ff2d55;
+
+  /* 포인트 색상 (블루): 검색창 포커스 등 */
+  --accent-blue: #007aff;
+
+  /* 부드러운 포인트 색상 (배경용) */
+  --accent-soft: rgba(255, 45, 85, 0.15);
+
+  /* 유리 효과용 흰색 (투명도 조절) */
+  --glass-white: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  /* 텍스트 색상 계층 */
+  --text-primary: #f5f5f7;            /* 주 텍스트 (흰색에 가까움) */
+  --text-secondary: rgba(245, 245, 247, 0.6); /* 보조 텍스트 (회색) */
+  --text-dim: rgba(245, 245, 247, 0.3);       /* 흐릿한 텍스트 (아이콘 등) */
+
+  /* 화면 좌우 여백 */
+  --safe-area: 20px;
+}
+
+/* ========================================================================== */
+/* [2] 기본 초기화 및 레이아웃 */
+/* 팝업 창의 크기와 폰트, 스크롤 동작을 설정합니다. */
+/* ========================================================================== */
+html, body {
+  /* 확장 프로그램 팝업 고정 크기 */
+  width: 380px;
+  height: 600px;
+  
+  margin: 0;
+  padding: 0;
+  
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  
+  /* 시스템 폰트 스택 사용 */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  
+  /* 스크롤바 숨김 및 텍스트 선택 방지 (앱 같은 느낌) */
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 앱 전체 컨테이너 */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  
+  /* 은은한 배경 그라데이션 효과 */
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(255, 45, 85, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(88, 86, 214, 0.06) 0px, transparent 50%);
+  
+  overflow-x: hidden;
+}
+
+/* ========================================================================== */
+/* [3] 상단 헤더 영역 */
+/* 앱 제목이 표시되는 상단 바입니다. */
+/* ========================================================================== */
+.header {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--glass-border);
+  
+  /* 크기 축소 방지 */
+  flex-shrink: 0;
+}
+
+.header h1 {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin: 0;
+}
+
+/* ========================================================================== */
+/* [4] 메인 콘텐츠 영역 (탭 전환) */
+/* 실제 기능 화면들이 표시되는 영역입니다. */
+/* ========================================================================== */
+.content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  padding: 0 var(--safe-area);
+  
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* 개별 탭 화면 (기본 숨김) */
+.tab-content {
+  display: none;
+  height: 100%;
+  flex-direction: column;
+  padding: 16px 0;
+  box-sizing: border-box;
+  min-height: 0;
+  overflow-x: hidden;
+}
+
+/* 활성화된 탭만 표시 */
+.tab-content.active {
+  display: flex;
+}
+
+/* ========================================================================== */
+/* [5] 플레이어 탭 UI */
+/* 앨범 아트, 제목, 재생 컨트롤이 있는 화면입니다. */
+/* ========================================================================== */
+.player-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+}
+
+/* 앨범 아트 이미지 래퍼 */
+.thumbnail-wrapper {
+  width: 100%;
+  max-height: 260px;
+  /* 정사각형 비율 유지 */
+  aspect-ratio: 1/1;
+  border-radius: 16px;
+  overflow: hidden;
+  
+  /* 그림자 및 배경 */
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  background: var(--glass-white);
+  
+  flex-shrink: 1;
+  margin-bottom: 12px;
+}
+
+.thumbnail-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 트랙 정보 (제목, 채널명) */
+.track-info {
+  text-align: center;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.track-info h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  
+  /* 긴 제목 말줄임표 처리 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-info p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* 진행 바 (Progress Bar) 영역 */
+.progress-container {
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.time-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+/* 슬라이더(Range Input) 공통 스타일 */
+input[type="range"] {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.1);
+  accent-color: var(--accent-neon);
+  appearance: none;
+  outline: none;
+  cursor: pointer;
+}
+
+/* ========================================================================== */
+/* [6] 컨트롤 버튼 UI */
+/* 재생, 일시정지, 이전/다음 곡 버튼 스타일입니다. */
+/* ========================================================================== */
+.controls-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+/* 기본 아이콘 버튼 */
+.btn-icon {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+  background: var(--glass-white);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+/* 메인 재생/일시정지 버튼 (크고 강조됨) */
+.btn-play-pause {
+  width: 64px;
+  height: 64px;
+  background: var(--accent-neon);
+  color: white;
+  box-shadow: 0 8px 20px rgba(255, 45, 85, 0.35);
+}
+
+.btn-play-pause:hover {
+  background: #ff4d70;
+  transform: scale(1.08);
+}
+
+/* 볼륨 조절 영역 */
+.volume-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  background: var(--glass-white);
+  border-radius: 12px;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+/* ========================================================================== */
+/* [7] 큐(Queue) 및 리스트 UI */
+/* 재생 목록 헤더와 리스트 아이템 스타일입니다. */
+/* ========================================================================== */
+
+/* 리스트 상단 고정 헤더 */
+.queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px 16px 4px;
+  margin-bottom: 4px;
+  
+  /* 스크롤 시 상단 고정 */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(180deg, var(--bg-main) 0%, var(--bg-main) 80%, transparent 100%);
+}
+
+.queue-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 곡 개수 뱃지 */
+#queue-count {
+  background: var(--glass-white);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  color: var(--text-primary);
+}
+
+/* 전체 삭제 버튼 */
+#btn-clear-all {
+  background: rgba(255, 45, 85, 0.08);
+  color: var(--accent-neon);
+  border: 1px solid rgba(255, 45, 85, 0.15);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+}
+
+#btn-clear-all:hover {
+  background: var(--accent-neon);
+  color: white;
+  border-color: var(--accent-neon);
+  box-shadow: 0 4px 12px rgba(255, 45, 85, 0.3);
+  transform: translateY(-1px);
+}
+
+#btn-clear-all:active {
+  transform: scale(0.95);
+}
+
+/* 스크롤 가능한 리스트 영역 */
+.list-view {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 20px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.list-view::-webkit-scrollbar {
+  display: none;
+}
+
+/* ========================================================================== */
+/* [8] 검색바 UI */
+/* ========================================================================== */
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+  margin-top: 4px;
+}
+
+/* 검색 아이콘 (입력창 위에 겹침) */
+.search-icon-overlay {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+/* 검색 입력 필드 */
+#search-input {
+  width: 100%;
+  height: 44px;
+  background: var(--glass-white);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  
+  /* 아이콘 공간 확보 */
+  padding: 0 16px 0 44px;
+  
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#search-input::placeholder {
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+#search-input:focus {
+  background: rgba(0, 122, 255, 0.08);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+#search-input:focus + .search-icon-overlay {
+  color: var(--accent-blue);
+}
+
+/* 추천 카테고리 칩 컨테이너 */
+.category-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 0;
+}
+
+/* 개별 카테고리 칩 */
+.category-chip {
+  background: var(--glass-white);
+  border: 1px solid var(--glass-border);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-chip:hover {
+  background: var(--accent-soft);
+  color: var(--accent-neon);
+  border-color: var(--accent-neon);
+  transform: translateY(-2px);
+  transform: scale(1.1);
+}
+
+/* ========================================================================== */
+/* [9] 리스트 아이템 및 슬라이드 액션 */
+/* 검색 결과 및 큐 아이템의 스타일과 슬라이드 동작을 정의합니다. */
+/* ========================================================================== */
+.search-item-wrapper {
+  position: relative;
+  width: 100%;
+  height: 72px;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--glass-white);
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+/* 현재 재생 중인 트랙 강조 */
+.search-item-wrapper.active-track {
+  border-color: var(--accent-neon);
+  background: rgba(255, 45, 85, 0.05);
+}
+
+/* 슬라이드 효과를 위한 내부 컨테이너 (너비를 넓게 잡음) */
+.search-item-inner {
+  display: flex;
+  /* 버튼 영역만큼 너비 추가 */
+  width: calc(100% + 140px);
+  height: 100%;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+}
+
+/* 슬라이드 활성화 시 왼쪽으로 이동 */
+.search-item-wrapper.slide-active .search-item-inner {
+  transform: translateX(-140px);
+}
+
+/* 아이템 내용 영역 */
+.search-item-content {
+  width: calc(100% - 140px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.search-item-content img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.search-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-item-info h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-item-info p {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* 슬라이드 시 나타나는 액션 버튼 그룹 */
+.search-item-actions {
+  width: 140px;
+  display: flex;
+  height: 100%;
+}
+
+.btn-action {
+  flex: 1;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* SVG 아이콘 크기 조정 */
+.ui-icon-asset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-icon-asset svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  transition: transform 0.2s ease;
+}
+
+.btn-action .ui-icon-asset svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* 개별 버튼 그라데이션 스타일 */
+.btn-action-play {
+  background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+  background-size: 200% 200%;
+}
+
+.btn-action-play:hover {
+  background-position: 100% 0;
+}
+
+.btn-action-add {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-size: 200% 200%;
+}
+
+.btn-action-add:hover {
+  background-position: 100% 0;
+}
+
+.btn-action-delete {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+  background: linear-gradient(135deg, #f83600 0%, #f9d423 100%);
+  background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+}
+
+.btn-action-delete:hover {
+  opacity: 0.9;
+}
+
+/* ========================================================================== */
+/* [10] 하단 네비게이션 바 */
+/* ========================================================================== */
+.nav-bar {
+  height: 64px;
+  display: flex;
+  background: rgba(15, 15, 18, 0.95);
+  backdrop-filter: blur(25px);
+  border-top: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-item.active {
+  color: var(--accent-neon);
+}
+
+.nav-item .ui-icon-asset svg {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-item span {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* ========================================================================== */
+/* [11] 토스트 메시지 (알림) */
+/* 화면 하단에 잠시 떴다 사라지는 메시지입니다. */
+/* ========================================================================== */
+#toast-container {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none;
+  width: 80%;
+  display: flex;
+  justify-content: center;
+}
+
+.toast {
+  background: rgba(20, 20, 24, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 13px;
+  
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s;
+  
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  font-weight: 500;
+  text-align: center;
+}
+
+/* 토스트 표시 클래스 */
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
